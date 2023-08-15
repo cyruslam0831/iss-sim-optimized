@@ -1390,26 +1390,30 @@ function animate() {
 
 
 function render() {
-    rotControl = navigator.getGamepads()[gamePads[0]];
-    traControl = navigator.getGamepads()[gamePads[1]];
+    if (gamePadCount == 2) {
+        rotControl = navigator.getGamepads()[gamePads[0]];
+        traControl = navigator.getGamepads()[gamePads[1]];
+    }
     if ((scene.updateMatrixWorld(), isWarpComplete)) {
-        translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
-        rotThrottle = rotControl.axes[6]*-0.5+1
-        traThrottle = traControl.axes[6]*-0.5+1
-        targetRotationX = rotControl.axes[1] * rotThrottle;
-        targetRotationY = rotControl.axes[0] * rotThrottle;
-        targetRotationZ = 0.5 * rotControl.axes[5] * rotThrottle;
-        rateRotationX = 10 * rotControl.axes[1] * rotThrottle;
-        rateRotationY = 10 * rotControl.axes[0] * rotThrottle;
-        rateRotationZ = 5 * rotControl.axes[5] * rotThrottle;
-        if (true) {
+        if (gamePadCount == 2) {
+            translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
+            rotThrottle = rotControl.axes[6]*-0.5+1
+            traThrottle = traControl.axes[6]*-0.5+1
+            targetRotationX = rotControl.axes[1] * rotThrottle;
+            targetRotationY = rotControl.axes[0] * rotThrottle;
+            targetRotationZ = 0.5 * rotControl.axes[5] * rotThrottle;
+            rateRotationX = 10 * rotControl.axes[1] * rotThrottle;
+            rateRotationY = 10 * rotControl.axes[0] * rotThrottle;
+            rateRotationZ = 5 * rotControl.axes[5] * rotThrottle;
+        }
         updateWorm("pitch");
         updateWorm("yaw");
         updateWorm("roll");
+        if (gamePadCount == 2) {
+            traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40
+            traY = (traY * 39 + traControl.axes[1]/20 * traThrottle) / 40
+            motionVector = new THREE.Vector3(traX, -traY, motionVector.z);
         }
-        traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40
-        traY = (traY * 39 + traControl.axes[1]/20 * traThrottle) / 40
-        motionVector = new THREE.Vector3(traX, -traY, motionVector.z);
         //console.log(`${(motionVector.x).toFixed(3)}, ${(motionVector.y).toFixed(3)}, ${(motionVector.z).toFixed(3)}` );
             (currentRotationX = currentRotationX += (0.001 * -targetRotationX - currentRotationX) * moveSpeed),
             (currentRotationY = currentRotationY += (0.001 * -targetRotationY - currentRotationY) * moveSpeed),

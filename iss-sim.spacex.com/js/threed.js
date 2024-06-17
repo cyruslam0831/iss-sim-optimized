@@ -45,6 +45,7 @@ var i,
     mouse = new THREE.Vector2(),
     mouseX = 0,
     mouseY = 0,
+    countDownDate,
     width = window.innerWidth,
     height = window.innerHeight,
     windowHalfX = width / 2,
@@ -466,7 +467,7 @@ function showInterface() {
             },
             1
         ),
-        console.log("show interface")
+        //console.log("show interface")
         interfaceAnimationIn.to(camera.position, 5, { x: randSign() * (10 * difficulty - randBetween(0, 5)), y: randSign() * (10 * difficulty - randBetween(0, 5)), z: 50 * (difficulty - 2.5) + randBetween(-20, 20), ease: "expo.inOut" }, 2),
         interfaceAnimationIn.to(camera.rotation, 5, { x: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, y: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, z: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, ease: "expo.inOut" }, 2),
         interfaceAnimationIn.fromTo("#rotation-controls, #translation-controls", 0.5, { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 0),
@@ -495,7 +496,7 @@ let start
 
 function startTimer() {
     start = new Date().getTime() + 8000;
-    var countDownDate = new Date().getTime() + timeLimit + 8000;
+    countDownDate = new Date().getTime() + timeLimit + 8000;
         var x = setInterval(function() {
             // Get the current time
             var now = new Date().getTime();
@@ -590,6 +591,7 @@ function resetMovement() {
 function resetPosition() {
     // console.log("resetPosition")
     resetMovement(),
+    countDownDate = new Date().getTime() + timeLimit + 1000,
         gsap.to(motionVector, 5, { x: 0, y: 0, z: 0, ease: "expo.out" }),
         gsap.to(translationVector, 5, { x: 0, y: 0, z: 0, ease: "expo.out" }),
         gsap.to(camera.position, 5, { x: randSign() * (10 * difficulty - randBetween(0, 5)), y: randSign() * (10 * difficulty - randBetween(0, 5)), z: 50 * (difficulty - 2.5) + randBetween(-20, 20) , ease: "expo.out" }),

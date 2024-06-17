@@ -183,7 +183,7 @@ function updatePreloader(t) {
     var e = 100 + texturesTotal,
         o = t + texturesLoaded,
         a = Math.round(100 * (o / e));
-    gsap.to("#preloader-circle .circle-color", 0.25, { drawSVG: "0% " + a + "%", immediateRender: !1, ease: "expo.out" }), ($("#preloader-percent").innerHTML = a);
+    gsap.to("#preloader-circle .circle-color", 0.25, { drawSVG: "0% " + a + "%", immediateRender: !1, ease: "expo.out" }), ($("#preloader-percent").innerHTML = "Loading");
 }
 function hidePreloader() {
     var t = new TimelineMax({ paused: !0, onComplete: function () {} });

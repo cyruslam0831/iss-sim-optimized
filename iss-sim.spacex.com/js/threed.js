@@ -75,6 +75,15 @@ var i,
 quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 0), Math.PI / 2);
 var $ = document.querySelector.bind(document),
     $$ = document.querySelectorAll.bind(document);
+
+function randBetween(min, max) {
+    return min + Math.random() * (max - min);
+}
+
+function randSign() {
+    return (Math.random() < 0.5? 1: -1);
+}
+
 function initWebgl() {
     setupDeviceSettings(),
         gsap.set(".hud-tip .circle", { drawSVG: "60% 90%" }),
@@ -148,6 +157,9 @@ function startPreloader() {
         t.play(0);
 }
 var forwardViewSpriteTexture, forwardViewSpriteJson;
+
+
+
 function initPreloader() {
     (earthTexture = deviceSettings.isMobile ? textureLoader.load("img/earth_mobile.jpg") : textureLoader.load("img/earth.jpg")),
         (navballTexture = textureLoader.load("img/navball.png")),
@@ -454,8 +466,9 @@ function showInterface() {
             },
             1
         ),
-        interfaceAnimationIn.to(camera.position, 5, { x: 12, y: 30, ease: "expo.inOut" }, 2),
-        interfaceAnimationIn.to(camera.rotation, 5, { x: -20 * toRAD, y: -10 * toRAD, z: 15 * toRAD, ease: "expo.inOut" }, 2),
+        console.log("show interface")
+        interfaceAnimationIn.to(camera.position, 5, { x: randSign() * (10 * difficulty - randBetween(0, 5)), y: randSign() * (10 * difficulty - randBetween(0, 5)), z: 50 * (difficulty - 2.5) + randBetween(-20, 20), ease: "expo.inOut" }, 2),
+        interfaceAnimationIn.to(camera.rotation, 5, { x: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, y: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, z: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, ease: "expo.inOut" }, 2),
         interfaceAnimationIn.fromTo("#rotation-controls, #translation-controls", 0.5, { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 0),
         interfaceAnimationIn.fromTo("#hud", 1, { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 2),
         interfaceAnimationIn.fromTo("#hud-ring", 1.5, { rotation: 180 }, { rotation: 0, ease: "expo.out" }, 2),
@@ -536,7 +549,7 @@ function hideInterface(t) {
         interfaceAnimationOut.to("#hud-ring", 1.5, { rotation: 180, ease: "expo.out" }, 0),
         interfaceAnimationOut.to("#hud-ring-inner", 1.5, { rotation: -180, ease: "expo.out" }, 0),
         interfaceAnimationOut.to("#rotation-controls, #translation-controls", 1, { autoAlpha: 0 }, 0.5),
-        interfaceAnimationOut.to(camera.position, 5, { x: 0, y: 0, z: 50, ease: "expo.inOut" }, 0),
+        interfaceAnimationOut.to(camera.position, 5, { x: 0, y: 0, z: 0, ease: "expo.inOut" }, 0),
         interfaceAnimationOut.to(camera.rotation, 5, { x: 0, y: 0, z: 0, ease: "expo.inOut" }, 0),
         interfaceAnimationOut.to(motionVector, 5, { x: 0, y: 0, z: 0, ease: "expo.inOut" }, 0),
         interfaceAnimationOut.to(translationVector, 5, { x: 0, y: 0, z: 0, ease: "expo.inOut" }, 0),
@@ -575,11 +588,12 @@ function resetMovement() {
         resetPrecision();
 }
 function resetPosition() {
+    // console.log("resetPosition")
     resetMovement(),
         gsap.to(motionVector, 5, { x: 0, y: 0, z: 0, ease: "expo.out" }),
         gsap.to(translationVector, 5, { x: 0, y: 0, z: 0, ease: "expo.out" }),
-        gsap.to(camera.position, 5, { x: 12, y: 30, z: 50, ease: "expo.out" }),
-        gsap.to(camera.rotation, 5, { x: -20 * toRAD, y: -10 * toRAD, z: 15 * toRAD, ease: "expo.out" });
+        gsap.to(camera.position, 5, { x: randSign() * (10 * difficulty - randBetween(0, 5)), y: randSign() * (10 * difficulty - randBetween(0, 5)), z: 50 * (difficulty - 2.5) + randBetween(-20, 20) , ease: "expo.out" }),
+        gsap.to(camera.rotation, 5, { x: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, y: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, z: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, ease: "expo.out" });
 }
 var lightObject,
     lightClose,
@@ -1502,15 +1516,15 @@ function checkCollision() {
 }
 function rollLeft() {
     !0 === isGameOver ||
-        ((targetRotationZ -= rotationPulseSize * toRAD), (rateRotationZ -= rateSpeedSize), gsap.fromTo("#tip-roll-left", 1.25, { rotation: -25, autoAlpha: 1 }, { rotation: -90, autoAlpha: 0, ease: "expo.out" }), updateWorm("roll"));
+        ((targetRotationZ -= rotationPulseSize * toRAD * 5 ), (rateRotationZ -= rateSpeedSize), gsap.fromTo("#tip-roll-left", 1.25, { rotation: -25, autoAlpha: 1 }, { rotation: -90, autoAlpha: 0, ease: "expo.out" }), updateWorm("roll"));
 }
 function rollRight() {
     !0 === isGameOver ||
-        ((targetRotationZ += rotationPulseSize * toRAD), (rateRotationZ += rateSpeedSize), gsap.fromTo("#tip-roll-right", 1.25, { rotation: 25, autoAlpha: 1 }, { rotation: 90, autoAlpha: 0, ease: "expo.out" }), updateWorm("roll"));
+        ((targetRotationZ += rotationPulseSize * toRAD * 5), (rateRotationZ += rateSpeedSize), gsap.fromTo("#tip-roll-right", 1.25, { rotation: 25, autoAlpha: 1 }, { rotation: 90, autoAlpha: 0, ease: "expo.out" }), updateWorm("roll"));
 }
 function pitchDown() {
     !0 === isGameOver ||
-        ((targetRotationX += rotationPulseSize * toRAD),
+        ((targetRotationX += rotationPulseSize * toRAD * 5 ),
         (rateRotationX += rateSpeedSize),
         gsap.fromTo("#tip-pitch-down", 1.25, { rotation: 180, rotationX: -25, autoAlpha: 1 }, { rotationX: -90, autoAlpha: 0, ease: "expo.out" }),
         updateWorm("pitch")
@@ -1518,27 +1532,27 @@ function pitchDown() {
 }
 function pitchUp() {
     !0 === isGameOver ||
-        ((targetRotationX -= rotationPulseSize * toRAD), (rateRotationX -= rateSpeedSize), gsap.fromTo("#tip-pitch-up", 1.25, { rotationX: -25, autoAlpha: 1 }, { rotationX: -90, autoAlpha: 0, ease: "expo.out" }), updateWorm("pitch"));
+        ((targetRotationX -= rotationPulseSize * 5 * toRAD), (rateRotationX -= rateSpeedSize), gsap.fromTo("#tip-pitch-up", 1.25, { rotationX: -25, autoAlpha: 1 }, { rotationX: -90, autoAlpha: 0, ease: "expo.out" }), updateWorm("pitch"));
 }
 function yawLeft() {
     !0 === isGameOver ||
-        ((targetRotationY -= rotationPulseSize * toRAD),
+        ((targetRotationY -= rotationPulseSize * 5 * toRAD),
         (rateRotationY -= rateSpeedSize),
         gsap.fromTo("#tip-yaw-left", 1.25, { rotation: -90, rotationX: -25, autoAlpha: 1 }, { rotationX: -90, autoAlpha: 0, ease: "expo.out" }),
         updateWorm("yaw"));
 }
 function yawRight() {
     !0 === isGameOver ||
-        ((targetRotationY += rotationPulseSize * toRAD),
+        ((targetRotationY += rotationPulseSize * 5  * toRAD),
         (rateRotationY += rateSpeedSize),
         gsap.fromTo("#tip-yaw-right", 1.25, { rotation: 90, rotationX: -25, autoAlpha: 1 }, { rotationX: -90, autoAlpha: 0, ease: "expo.out" }),
         updateWorm("yaw"));
 }
 function translateForward() {
     !0 === isGameOver ||
-        ((translationVector = new THREE.Vector3(0, 0, -translationPulseSize)),
+        ((translationVector = new THREE.Vector3(0, 0, -translationPulseSize * 2.5 )),
         translationVector.applyQuaternion(camera.quaternion),
-        motionVector.add(translationVector),
+        motionVector.add(translationVector ),
         gsap.fromTo(
             "#tip-translate-forward-up .arrow, #tip-translate-forward-right .arrow, #tip-translate-forward-down .arrow, #tip-translate-forward-left .arrow",
             2,
@@ -1549,7 +1563,7 @@ function translateForward() {
 }
 function translateBackward() {
     !0 === isGameOver ||
-        ((translationVector = new THREE.Vector3(0, 0, translationPulseSize)),
+        ((translationVector = new THREE.Vector3(0, 0, translationPulseSize * 2.5 )),
         translationVector.applyQuaternion(camera.quaternion),
         motionVector.add(translationVector),
         gsap.fromTo(
@@ -1563,7 +1577,7 @@ function translateBackward() {
 }
 function translateDown() {
     !0 === isGameOver ||
-        ((translationVector = new THREE.Vector3(0, -translationPulseSize, 0)),
+        ((translationVector = new THREE.Vector3(0, -translationPulseSize * 1 , 0)),
         translationVector.applyQuaternion(camera.quaternion),
         motionVector.add(translationVector),
         gsap.fromTo("#tip-translatey-pos .arrow1", 2, { x: 0, scale: 1, autoAlpha: 1 }, { x: -50, scale: 1, autoAlpha: 0, ease: "expo.out" }),
@@ -1572,7 +1586,7 @@ function translateDown() {
 }
 function translateUp() {
     !0 === isGameOver ||
-        ((translationVector = new THREE.Vector3(0, translationPulseSize, 0)),
+        ((translationVector = new THREE.Vector3(0, translationPulseSize * 1 , 0)),
         translationVector.applyQuaternion(camera.quaternion),
         motionVector.add(translationVector),
         gsap.fromTo("#tip-translatey-neg .arrow1", 2, { x: 0, scale: 1, autoAlpha: 1 }, { x: -50, scale: 1, autoAlpha: 0, ease: "expo.out" }),
@@ -1581,7 +1595,7 @@ function translateUp() {
 }
 function translateRight() {
     !0 === isGameOver ||
-        ((translationVector = new THREE.Vector3(translationPulseSize, 0, 0)),
+        ((translationVector = new THREE.Vector3(translationPulseSize * 1 , 0, 0)),
         translationVector.applyQuaternion(camera.quaternion),
         motionVector.add(translationVector),
         gsap.fromTo("#tip-translatex-pos .arrow1", 2, { x: 0, scale: 1, autoAlpha: 1 }, { x: -50, scale: 1, autoAlpha: 0, ease: "expo.out" }),
@@ -1590,7 +1604,7 @@ function translateRight() {
 }
 function translateLeft() {
     !0 === isGameOver ||
-        ((translationVector = new THREE.Vector3(-translationPulseSize, 0, 0)),
+        ((translationVector = new THREE.Vector3(-translationPulseSize * 1 , 0, 0)),
         translationVector.applyQuaternion(camera.quaternion),
         motionVector.add(translationVector),
         gsap.fromTo("#tip-translatex-neg .arrow1", 2, { x: 0, scale: 1, autoAlpha: 1 }, { x: -50, scale: 1, autoAlpha: 0, ease: "expo.out" }),

@@ -489,6 +489,8 @@ function showInterface() {
         if (timeLimit != -1) {
             startTimer();
             //console.log("starting timer");
+        } else {
+            document.getElementById("timer").innerHTML = "∞:∞"
         }
 }
 

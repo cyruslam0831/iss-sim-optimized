@@ -28,7 +28,8 @@ function setupDeviceSettings() {
 gamePads = [null, null]
 gamePadCount = 0
 
-var i,
+var debug = false,
+    i,
     x,
     y,
     camera,
@@ -68,6 +69,7 @@ var i,
     hitDirectionVector = new THREE.Vector3(),
     hitDistance = 1,
     timeLimit = 120000,
+    mode = 2
     difficulty = 2,
     toleranceRotation = 0.4,
     toleranceRate = 0.006;
@@ -218,6 +220,7 @@ function initButtons() {
           $("#setting-gravity").addEventListener("touchstart", toggleGravity, !1),
           $("#setting-earth").addEventListener("touchstart", toggleEarthShape, !1),
           $("#setting-timer").addEventListener("touchstart", toggleTimer, !1),
+          $("#setting-mode").addEventListener("touchstart", toggleMode, !1),
           $("#setting-difficulty").addEventListener("touchstart", toggleDifficulty, !1),
           $("#setting-switch").addEventListener("touchstart", switchController, !1),
           $("#translate-forward-button").addEventListener("touchstart", translateForward, !1),
@@ -250,6 +253,7 @@ function initButtons() {
           $("#setting-gravity").addEventListener("click", toggleGravity, !1),
           $("#setting-earth").addEventListener("click", toggleEarthShape, !1),
           $("#setting-timer").addEventListener("click", toggleTimer, !1),
+          $("#setting-mode").addEventListener("click", toggleMode, !1),
           $("#setting-difficulty").addEventListener("click", toggleDifficulty, !1),
           $("#setting-switch").addEventListener("click", switchController, !1),
           $("#translate-forward-button").addEventListener("click", translateForward, !1),
@@ -469,7 +473,9 @@ function showInterface() {
         ),
         //console.log("show interface")
         interfaceAnimationIn.to(camera.position, 5, { x: randSign() * (10 * difficulty - randBetween(0, 5)), y: randSign() * (10 * difficulty - randBetween(0, 5)), z: 50 * (difficulty - 2.5) + randBetween(-20, 20), ease: "expo.inOut" }, 2),
-        interfaceAnimationIn.to(camera.rotation, 5, { x: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, y: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, z: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, ease: "expo.inOut" }, 2),
+        mode === 2 ? interfaceAnimationIn.to(camera.rotation, 5, { x: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, y: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, z: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, ease: "expo.inOut" }, 2): interfaceAnimationIn.to(camera.rotation, 5, { x: 0, y: 0, z: 0, ease: "expo.inOut" }, 2),
+        
+        
         interfaceAnimationIn.fromTo("#rotation-controls, #translation-controls", 0.5, { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 0),
         interfaceAnimationIn.fromTo("#hud", 1, { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 2),
         interfaceAnimationIn.fromTo("#hud-ring", 1.5, { rotation: 180 }, { rotation: 0, ease: "expo.out" }, 2),
@@ -486,6 +492,7 @@ function showInterface() {
         interfaceAnimationIn.fromTo("#timer", 1, { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 3),
         interfaceAnimationIn.play(0);
         gameStarted = true
+        start = new Date().getTime() + 8000;
         if (timeLimit != -1) {
             startTimer();
             //console.log("starting timer");
@@ -497,7 +504,6 @@ function showInterface() {
 let start
 
 function startTimer() {
-    start = new Date().getTime() + 8000;
     countDownDate = new Date().getTime() + timeLimit + 8000;
         var x = setInterval(function() {
             // Get the current time
@@ -593,11 +599,12 @@ function resetMovement() {
 function resetPosition() {
     // console.log("resetPosition")
     resetMovement(),
-    countDownDate = new Date().getTime() + timeLimit + 1000,
+    start = new Date().getTime() + 4000;
+    countDownDate = new Date().getTime() + timeLimit + 4000,
         gsap.to(motionVector, 5, { x: 0, y: 0, z: 0, ease: "expo.out" }),
         gsap.to(translationVector, 5, { x: 0, y: 0, z: 0, ease: "expo.out" }),
         gsap.to(camera.position, 5, { x: randSign() * (10 * difficulty - randBetween(0, 5)), y: randSign() * (10 * difficulty - randBetween(0, 5)), z: 50 * (difficulty - 2.5) + randBetween(-20, 20) , ease: "expo.out" }),
-        gsap.to(camera.rotation, 5, { x: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, y: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, z: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, ease: "expo.out" });
+        mode === 2 ? gsap.to(camera.rotation, 5, { x: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, y: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, z: randSign() * (randBetween(1, 3) * (difficulty)) * toRAD, ease: "expo.out" }): gsap.to(camera.rotation, 5, { x: 0, y: 0, z: 0, ease: "expo.out" });
 }
 var lightObject,
     lightClose,
@@ -1400,6 +1407,7 @@ var prevRange,
     rateSmoothingFactor = 2;
     traX = 0
     traY = 0
+    traZ = 0
 
 function animate() {
     requestAnimationFrame(animate), render();
@@ -1408,30 +1416,64 @@ function animate() {
 
 
 function render() {
-    if (gamePadCount == 2) {
-        rotControl = navigator.getGamepads()[gamePads[0]];
-        traControl = navigator.getGamepads()[gamePads[1]];
+    if (mode === 1) {
+        traControl = navigator.getGamepads()[gamePads[0]];
+    } else {
+        if (gamePadCount == 2) {
+            rotControl = navigator.getGamepads()[gamePads[0]];
+            traControl = navigator.getGamepads()[gamePads[1]];
+        }
     }
+    
     if ((scene.updateMatrixWorld(), isWarpComplete)) {
-        if (gamePadCount == 2) {
+        if (mode === 1) {
             translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
-            rotThrottle = rotControl.axes[6]*-0.5+1
             traThrottle = traControl.axes[6]*-0.5+1
-            targetRotationX = rotControl.axes[1] * rotThrottle;
-            targetRotationY = rotControl.axes[0] * rotThrottle;
-            targetRotationZ = 0.5 * rotControl.axes[5] * rotThrottle;
-            rateRotationX = 10 * rotControl.axes[1] * rotThrottle;
-            rateRotationY = 10 * rotControl.axes[0] * rotThrottle;
-            rateRotationZ = 5 * rotControl.axes[5] * rotThrottle;
-        }
-        updateWorm("pitch");
-        updateWorm("yaw");
-        updateWorm("roll");
-        if (gamePadCount == 2) {
+            updateWorm("pitch");
+            updateWorm("yaw");
+            updateWorm("roll");
             traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40
-            traY = (traY * 39 + traControl.axes[1]/20 * traThrottle) / 40
-            motionVector = new THREE.Vector3(traX, -traY, motionVector.z);
+            if (Math.round(traControl.axes[9] * 10) === -10 || Math.round(traControl.axes[9] * 10) === -7 || Math.round(traControl.axes[9] * 10) === 10){
+                if (debug) {
+                    console.log("Up")
+                }
+                YControl = 1
+            } else if (Math.round(traControl.axes[9] * 10) === -1 || Math.round(traControl.axes[9] * 10) === 1 || Math.round(traControl.axes[9] * 10) === 4){
+                YControl = -1
+                if (debug) {
+                    console.log("Down")
+                }
+            } else {
+                YControl = 0
+                if (debug) {
+                    console.log("Stop")
+                }
+            }
+            traY = (traY * 39 + YControl * traThrottle/40) / 40
+            traZ = (traZ * 39 + traControl.axes[1]/20 * traThrottle) / 40
+            motionVector = new THREE.Vector3(traX, traY, traZ);
+        } else {
+            if (gamePadCount == 2) {
+                translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
+                rotThrottle = rotControl.axes[6]*-0.5+1
+                traThrottle = traControl.axes[6]*-0.5+1
+                targetRotationX = rotControl.axes[1] * rotThrottle;
+                targetRotationY = rotControl.axes[0] * rotThrottle;
+                targetRotationZ = 0.5 * rotControl.axes[5] * rotThrottle;
+                rateRotationX = 10 * rotControl.axes[1] * rotThrottle;
+                rateRotationY = 10 * rotControl.axes[0] * rotThrottle;
+                rateRotationZ = 5 * rotControl.axes[5] * rotThrottle;
+            }
+            updateWorm("pitch");
+            updateWorm("yaw");
+            updateWorm("roll");
+            if (gamePadCount == 2) {
+                traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40
+                traY = (traY * 39 + traControl.axes[1]/20 * traThrottle) / 40
+                motionVector = new THREE.Vector3(traX, -traY, motionVector.z);
+            }
         }
+        
         //console.log(`${(motionVector.x).toFixed(3)}, ${(motionVector.y).toFixed(3)}, ${(motionVector.z).toFixed(3)}` );
             (currentRotationX = currentRotationX += (0.001 * -targetRotationX - currentRotationX) * moveSpeed),
             (currentRotationY = currentRotationY += (0.001 * -targetRotationY - currentRotationY) * moveSpeed),
@@ -1722,6 +1764,20 @@ function toggleTimer() {
         $("#setting-timer span").innerHTML = "NONE"
     }
 }
+
+function toggleMode() {
+    if (mode === 3) {
+        mode = 1;
+        $("#setting-mode span").innerHTML = "1 CONTROLLER (NO ROTATION)"
+    } else if (mode === 1) {
+        mode = 2;
+        $("#setting-mode span").innerHTML = "2 CONTROLLERS (WITH ROTATION)"
+    } else if (mode === 2) {
+        mode = 3;
+        $("#setting-mode span").innerHTML = "2 CONTROLLERS (NO ROTATION)"
+    }
+}
+
 /*
 Difficulty list:
 1: Easy
@@ -1806,14 +1862,21 @@ window.addEventListener("gamepaddisconnected", (e) => {
 
 function handleGamepadInput() {
     const gamepads = navigator.getGamepads();
+    
     if (gamepads && gamepads[0]) {
-    rotControl = navigator.getGamepads()[gamePads[0]];
-    traControl = navigator.getGamepads()[gamePads[1]];
-    if (rotControl.buttons[0].pressed) {
-        translateForward();
-    } else if (traControl.buttons[0].pressed) {
-        translateBackward();
-    }
+        if (mode === 1) {
+            traControl = navigator.getGamepads()[gamePads[0]]
+
+        } else if (gamePadCount === 2) {
+            rotControl = navigator.getGamepads()[gamePads[0]];
+            traControl = navigator.getGamepads()[gamePads[1]];
+            if (rotControl.buttons[0].pressed) {
+                translateForward();
+            } else if (traControl.buttons[0].pressed) {
+                translateBackward();
+            }
+        }
+    
 }
 }
 
@@ -1841,3 +1904,395 @@ function switchController() {
   8
   9: POV1
   */
+
+
+
+
+  // Autopilot
+
+  function getYaw() {
+    let raw = document.getElementById("yaw").children[0].innerText
+    return -parseFloat(raw.substring(0, raw.length - 1))
+}
+
+function getPitch() {
+    let raw = document.getElementById("pitch").children[0].innerText
+    return parseFloat(raw.substring(0, raw.length - 1))
+}
+
+function getRoll() {
+
+    let raw = document.getElementById("roll").children[0].innerText
+    return -parseFloat(raw.substring(0, raw.length - 1))
+}
+
+
+function getX(){
+
+    let raw = document.getElementById("x-range").innerText
+    return parseFloat(raw.substring(0, raw.length - 1))
+}
+
+
+function getY(){
+
+    let raw = document.getElementById("y-range").innerText
+    return parseFloat(raw.substring(0, raw.length - 1))
+}
+
+function getZ(){
+
+    let raw = document.getElementById("z-range").innerText
+    return parseFloat(raw.substring(0, raw.length - 1))
+}
+
+class Assistant {
+    constructor(param = {}) {
+        let { pc = 5, ic = 0, dc = 0, tv = 0, functionIncrease = null, functionDecrease = null, interval = 100 } = param;
+        this.enabled = false;
+        this.pc = pc; //Proportional coefficient
+        this.ic = ic; //Integral coefficient
+        this.dc = dc; //Derrivative coefficient
+        this.tv = tv; //or setpoint
+        this.lastError = 0;
+        this.errorSum = 0;
+        this.maxOutVal = 2; //max output
+        this.minOutVal = -2; // min output
+        this.functionIncrease = functionIncrease;
+        this.functionDecrease = functionDecrease;
+        this.getInput = null;
+        this.interval = interval
+        this.lastTime = null;
+
+        return new Proxy(this, {
+
+            get: function(target, prop) {
+                if (!(prop in target)) throw new ReferenceError(`prop does not exist`)
+                return Reflect.get(...arguments)
+            },
+
+            set: function(target, prop, value) {
+                if (!(prop in target)) throw new ReferenceError(`prop does not exist`)
+                return Reflect.set(...arguments)
+            }
+        })
+
+    }
+
+    compute (input) {
+        let now = new Date();
+        let deltaTime = (now - this.lastTime) * .001; //in seconds
+        let error = this.tv - input;
+
+        this.errorSum += (error * deltaTime)
+        let dErr = (error - this.lastError) / deltaTime;
+
+        this.lastError = error
+        this.lastTime = now
+        if (debug) {
+            console.log(`pc: ${this.pc}, ic ${this.ic}, dc: ${this.dc}, error: ${error}, dErr: ${dErr}, deltaTime: ${deltaTime}`);
+        }
+        return (this.pc * error + this.ic * this.errorSum + this.dc * dErr);
+    }
+
+
+    run() {
+        let self = this
+        if(this.enabled) return //already running
+        this.enabled = true;
+        if (this.functionIncrease === null || this.functionDecrease === null || this.getInput === null)
+            throw new Error("Assistant is not initialized")
+        this.lastTime = new Date()
+
+        let runOnce = function(){
+            if (document.getElementById("timer").innerText==="") {
+                ap.x.stop()
+                ap.y.stop()
+                ap.z.stop()
+                ap.roll.stop()
+                ap.pitch.stop()
+                ap.yaw.stop()
+                ap.disable()
+            }
+
+            let input = self.getInput()
+            if (debug) {
+                console.log(`Input: ${input}`);
+            }
+            let output = self.compute(input)
+            if (debug) {
+                console.log(`Output: ${output}`);
+            }
+            for (let i=0; i<self.normalizeOutput(Math.floor(Math.abs(output))); ++i ){
+                output < 0 ? self.functionIncrease() : self.functionDecrease();
+            }
+
+            if(self.enabled) setTimeout(runOnce, self.interval);
+        }
+
+        runOnce()
+    }
+
+    stop(){
+        this.enabled = false;
+    }
+
+    toggle(){
+        if (this.enabled) {
+            this.stop()
+        } else {
+            this.run()
+        }
+    }
+
+    normalizeOutput(val){
+        return val > this.maxOutVal ? this.maxOutVal : val
+    }
+
+    setTunings(pc, ic, dc) {
+        this.pc = pc
+        this.ic = ic
+        this.dc = dc
+    }
+
+
+
+    setInterval(interval) {
+        this.interval = interval;
+    }
+
+    setFunctionIncrease(fn) {
+        this.functionIncrease = fn
+    }
+
+    setFunctionDecrease(fn) {
+        this.functionDecrease = fn
+    }
+
+    setInputGetter(fn){
+        this.getInput = fn;
+    }
+}
+
+
+
+function prepareRollAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(window.getRoll);
+    res.setFunctionIncrease(window.rollRight);
+    res.setFunctionDecrease(window.rollLeft);
+    res.dc = 100
+    return res;
+}
+
+
+function prepareYawAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getYaw);
+    res.setFunctionIncrease(window.yawRight);
+    res.setFunctionDecrease(window.yawLeft);
+    res.dc = 100
+    return res;
+}
+function preparePitchAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getPitch);
+    res.setFunctionIncrease(window.pitchDown);
+    res.setFunctionDecrease(window.pitchUp);
+    res.dc = 100
+    return res;
+}
+
+
+function prepareXAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getX);
+    res.setFunctionIncrease(window.translateForward);
+    res.setFunctionDecrease(window.translateBackward);
+    res.dc = 130
+    res.pc = 20
+    res.tv = 1.5
+    res.interval = 100
+    return res;
+}
+function prepareYAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getY);
+    res.setFunctionIncrease(window.translateLeft);
+    res.setFunctionDecrease(window.translateRight);
+    res.dc = 100
+    res.tv = 0.0
+    return res;
+}
+function prepareZAssistant(){
+    let res = new Assistant();
+    res.setInputGetter(getZ);
+    res.setFunctionIncrease(window.translateDown);
+    res.setFunctionDecrease(window.translateUp);
+    res.dc = 100
+    res.tv = 0.0
+    return res;
+}
+
+class Autopilot{
+    constructor(){
+        this.roll = prepareRollAssistant();
+        this.pitch = preparePitchAssistant();
+        this.yaw = prepareYawAssistant()
+        this.x = prepareXAssistant()
+        this.y = prepareYAssistant()
+        this.z = prepareZAssistant()
+        this.enabled = false
+    }
+
+    checkApproach(){
+        //console.log("Checking Approach...")
+        if (getX() < 3){
+            if (ap.x.dc != 100) {console.log("Phase II - Approach")}
+            ap.x.dc = 100
+            ap.y.dc = 100
+            ap.z.dc = 100
+            if (Math.abs(getY()) < 0.2 && Math.abs(getZ()) < 0.2 && Math.abs(getPitch()) < 0.2 && Math.abs(getRoll()) < 0.2 && Math.abs(getYaw()) < 0.2 ) { 
+                ap.x.pc = 2
+            }
+        } else if (getX() < 10) {
+            if (ap.x.pc != 5) {console.log("Phase I - Pre-docking Speed Reduction")}
+            ap.x.pc = 5
+        }
+
+        if (Math.abs(getY()) < 0.2 && Math.abs(getZ()) < 0.2 && Math.abs(getPitch()) < 0.2 && Math.abs(getRoll()) < 0.2 && getX() < 2) {
+            if (ap.x.tv != 1.5) {
+                console.log("Phase III - Docking")
+                ap.x.interval = 50
+            }
+            ap.x.tv -= 0.1 * getX()
+        }
+        if (ap.enabled) setTimeout(ap.checkApproach, 1000);
+
+    }
+
+
+    disable(params = {}){
+
+        let { roll=true, pitch=true, yaw=true, x=true, y=true, z=true } = params
+        if (this.enabled) this.enabled = false;
+    }
+
+    enable(params = {}){
+        let { roll=true, pitch=true, yaw=true, x=true, y=true, z=true } = params
+        this.enabled = true
+        this.checkApproach()
+    }
+
+    toggle(assistant){
+        let assistants = {
+            x: this.x,
+            y: this.y,
+            z: this.z,
+            roll: this.roll,
+            pitch: this.pitch,
+            yaw: this.yaw
+        }
+
+        if(assistant in assistants){
+            assistants[assistant].toggle();
+        } else{
+            console.log("Assistant does not exist");
+        }
+
+    }
+}
+
+
+let ap = new Autopilot();;
+
+document.onkeyup = ev=>{
+    switch(ev.key){
+        case "f":
+            if(ap.enabled){
+                ap.x.stop()
+                ap.y.stop()
+                ap.z.stop()
+                ap.roll.stop()
+                ap.pitch.stop()
+                ap.yaw.stop()
+                ap.disable()
+                break;
+            } else {
+                ap = new Autopilot();
+                ap.enable()
+                ap.x.run()
+                ap.y.run()
+                ap.z.run()
+                ap.roll.run()
+                ap.pitch.run()
+                ap.yaw.run()
+                console.log("Autopilot enabled")
+            }
+            break;
+        case "y":
+            ap.toggle("y")
+            break;
+        case "Y":
+            ap.toggle("yaw")
+            break;
+
+        case "z":
+            ap.toggle("z")
+            break;
+        case "x":
+            ap.toggle("x")
+            if (ap.x.enabled) {
+                ap.disable()
+            } else {
+                ap.enable()
+            }
+            break;
+        case "p":
+            ap.toggle("pitch")
+            break;
+        case "r":
+            ap.toggle("roll")
+            break;    
+        case "F":
+            if(ap.enabled){
+                ap.x.stop()
+                ap.y.stop()
+                ap.z.stop()
+                ap.roll.stop()
+                ap.pitch.stop()
+                ap.yaw.stop()
+                ap.disable()
+                break;
+            } else {
+                ap = new Autopilot();
+                ap.enable()
+                ap.x.run()
+                ap.y.run()
+                ap.z.run()
+                ap.roll.run()
+                ap.pitch.run()
+                ap.yaw.run()
+                console.log("Autopilot enabled")
+            }
+            break;
+
+        case "Z":
+            ap.toggle("z")
+            break;
+        case "X":
+            ap.toggle("x")
+            if (ap.x.enabled) {
+                ap.disable()
+            } else {
+                ap.enable()
+            }
+            break;
+        case "P":
+            ap.toggle("pitch")
+            break;
+        case "R":
+            ap.toggle("roll")
+            break;
+    }
+}

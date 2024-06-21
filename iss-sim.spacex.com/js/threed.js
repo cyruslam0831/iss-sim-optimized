@@ -2212,8 +2212,8 @@ class Autopilot{
 let ap = new Autopilot();;
 
 document.onkeyup = ev=>{
-    switch(ev.key){
-        case "f":
+    switch(ev.keyCode){
+        case 70:
             if(ap.enabled){
                 ap.x.stop()
                 ap.y.stop()
@@ -2235,17 +2235,17 @@ document.onkeyup = ev=>{
                 console.log("Autopilot enabled")
             }
             break;
-        case "y":
-            ap.toggle("y")
+        case 89:
+            if (ev.shiftKey) {
+                ap.toggle("yaw")
+            } else {
+                ap.toggle("y")
+            }
             break;
-        case "Y":
-            ap.toggle("yaw")
-            break;
-
-        case "z":
+        case 90:
             ap.toggle("z")
             break;
-        case "x":
+        case 88:
             ap.toggle("x")
             if (ap.x.enabled) {
                 ap.disable()
@@ -2253,51 +2253,11 @@ document.onkeyup = ev=>{
                 ap.enable()
             }
             break;
-        case "p":
+        case 80:
             ap.toggle("pitch")
             break;
-        case "r":
+        case 82:
             ap.toggle("roll")
             break;    
-        case "F":
-            if(ap.enabled){
-                ap.x.stop()
-                ap.y.stop()
-                ap.z.stop()
-                ap.roll.stop()
-                ap.pitch.stop()
-                ap.yaw.stop()
-                ap.disable()
-                break;
-            } else {
-                ap = new Autopilot();
-                ap.enable()
-                ap.x.run()
-                ap.y.run()
-                ap.z.run()
-                ap.roll.run()
-                ap.pitch.run()
-                ap.yaw.run()
-                console.log("Autopilot enabled")
-            }
-            break;
-
-        case "Z":
-            ap.toggle("z")
-            break;
-        case "X":
-            ap.toggle("x")
-            if (ap.x.enabled) {
-                ap.disable()
-            } else {
-                ap.enable()
-            }
-            break;
-        case "P":
-            ap.toggle("pitch")
-            break;
-        case "R":
-            ap.toggle("roll")
-            break;
     }
 }

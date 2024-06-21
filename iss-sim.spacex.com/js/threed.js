@@ -1417,7 +1417,9 @@ function animate() {
 
 function render() {
     if (mode === 1) {
-        traControl = navigator.getGamepads()[gamePads[0]];
+        if (gamePadCount == 1){
+            traControl = navigator.getGamepads()[gamePads[0]];
+        }
     } else {
         if (gamePadCount == 2) {
             rotControl = navigator.getGamepads()[gamePads[0]];
@@ -1427,31 +1429,33 @@ function render() {
     
     if ((scene.updateMatrixWorld(), isWarpComplete)) {
         if (mode === 1) {
-            translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
-            traThrottle = traControl.axes[6]*-0.5+1
-            updateWorm("pitch");
-            updateWorm("yaw");
-            updateWorm("roll");
-            traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40
-            if (Math.round(traControl.axes[9] * 10) === -10 || Math.round(traControl.axes[9] * 10) === -7 || Math.round(traControl.axes[9] * 10) === 10){
-                if (debug) {
-                    console.log("Up")
+            if (gamePadCount == 1) {
+                translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
+                traThrottle = traControl.axes[6]*-0.5+1
+                updateWorm("pitch");
+                updateWorm("yaw");
+                updateWorm("roll");
+                traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40
+                if (Math.round(traControl.axes[9] * 10) === -10 || Math.round(traControl.axes[9] * 10) === -7 || Math.round(traControl.axes[9] * 10) === 10){
+                    if (debug) {
+                        console.log("Up")
+                    }
+                    YControl = 1
+                } else if (Math.round(traControl.axes[9] * 10) === -1 || Math.round(traControl.axes[9] * 10) === 1 || Math.round(traControl.axes[9] * 10) === 4){
+                    YControl = -1
+                    if (debug) {
+                        console.log("Down")
+                    }
+                } else {
+                    YControl = 0
+                    if (debug) {
+                        console.log("Stop")
+                    }
                 }
-                YControl = 1
-            } else if (Math.round(traControl.axes[9] * 10) === -1 || Math.round(traControl.axes[9] * 10) === 1 || Math.round(traControl.axes[9] * 10) === 4){
-                YControl = -1
-                if (debug) {
-                    console.log("Down")
-                }
-            } else {
-                YControl = 0
-                if (debug) {
-                    console.log("Stop")
-                }
-            }
-            traY = (traY * 39 + YControl * traThrottle/40) / 40
-            traZ = (traZ * 39 + traControl.axes[1]/20 * traThrottle) / 40
-            motionVector = new THREE.Vector3(traX, traY, traZ);
+                traY = (traY * 39 + YControl * traThrottle/40) / 40
+                traZ = (traZ * 39 + traControl.axes[1]/20 * traThrottle) / 40
+                motionVector = new THREE.Vector3(traX, traY, traZ);
+            }    
         } else {
             if (gamePadCount == 2) {
                 translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
@@ -1865,8 +1869,9 @@ function handleGamepadInput() {
     
     if (gamepads && gamepads[0]) {
         if (mode === 1) {
-            traControl = navigator.getGamepads()[gamePads[0]]
-
+            if (gamePadCount == 1) {
+                traControl = navigator.getGamepads()[gamePads[0]]
+            }
         } else if (gamePadCount === 2) {
             rotControl = navigator.getGamepads()[gamePads[0]];
             traControl = navigator.getGamepads()[gamePads[1]];

@@ -1417,11 +1417,11 @@ function animate() {
 
 function render() {
     if (mode === 1) {
-        if (gamePadCount == 1){
+        if (gamePadCount >= 1){
             traControl = navigator.getGamepads()[gamePads[0]];
         }
     } else {
-        if (gamePadCount == 2) {
+        if (gamePadCount >= 2) {
             rotControl = navigator.getGamepads()[gamePads[0]];
             traControl = navigator.getGamepads()[gamePads[1]];
         }
@@ -1429,7 +1429,7 @@ function render() {
     
     if ((scene.updateMatrixWorld(), isWarpComplete)) {
         if (mode === 1) {
-            if (gamePadCount == 1) {
+            if (gamePadCount >= 1) {
                 translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
                 traThrottle = traControl.axes[6]*-0.5+1
                 updateWorm("pitch");
@@ -1457,9 +1457,13 @@ function render() {
                 motionVector = new THREE.Vector3(traX, traY, traZ);
             }    
         } else {
-            if (gamePadCount == 2) {
+            if (gamePadCount >= 2) {
                 translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
-                rotThrottle = rotControl.axes[6]*-0.5+1
+                if (mode === 2) {
+                    rotThrottle = rotControl.axes[6]*-0.5+1
+                } else {
+                    rotThrottle = 0
+                }
                 traThrottle = traControl.axes[6]*-0.5+1
                 targetRotationX = rotControl.axes[1] * rotThrottle;
                 targetRotationY = rotControl.axes[0] * rotThrottle;
@@ -1471,7 +1475,7 @@ function render() {
             updateWorm("pitch");
             updateWorm("yaw");
             updateWorm("roll");
-            if (gamePadCount == 2) {
+            if (gamePadCount >= 2) {
                 traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40
                 traY = (traY * 39 + traControl.axes[1]/20 * traThrottle) / 40
                 motionVector = new THREE.Vector3(traX, -traY, motionVector.z);
@@ -1542,6 +1546,10 @@ function checkCollision() {
             i = Math.abs(motionVector.x),
             n = Math.abs(motionVector.y),
             s = Math.abs(motionVector.z);
+        if (debug) {
+            console.log(motionVector);
+             console.log(i);
+        }
         if (
             ((hitDistance = 0.5 < e ? 1 : 0.1),
             (hitRaycaster.far = hitDistance),
@@ -1772,12 +1780,15 @@ function toggleTimer() {
 function toggleMode() {
     if (mode === 3) {
         mode = 1;
+        rotationPulseSize = 0
         $("#setting-mode span").innerHTML = "1 CONTROLLER (NO ROTATION)"
     } else if (mode === 1) {
         mode = 2;
+        rotationPulseSize = 0.1
         $("#setting-mode span").innerHTML = "2 CONTROLLERS (WITH ROTATION)"
     } else if (mode === 2) {
         mode = 3;
+        rotationPulseSize = 0
         $("#setting-mode span").innerHTML = "2 CONTROLLERS (NO ROTATION)"
     }
 }
@@ -1868,8 +1879,8 @@ function handleGamepadInput() {
     const gamepads = navigator.getGamepads();
     
     if (gamepads && gamepads[0]) {
-        if (mode === 1) {
-            if (gamePadCount == 1) {
+        if (mode === 2) {
+            if (gamePadCount >= 1) {
                 traControl = navigator.getGamepads()[gamePads[0]]
             }
         } else if (gamePadCount === 2) {
@@ -1886,7 +1897,7 @@ function handleGamepadInput() {
 }
 
 function switchController() {
-    if (gamePadCount == 2) {
+    if (gamePadCount >= 2) {
         temp = gamePads[0]
         gamePads[0] = gamePads[1]
         gamePads[1] = temp

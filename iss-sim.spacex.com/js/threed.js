@@ -1428,34 +1428,21 @@ function render() {
     }
     
     if ((scene.updateMatrixWorld(), isWarpComplete)) {
-        if (mode === 1) {
-            if (gamePadCount >= 1) {
+        
+        // MODIFIED 0617
+        if (mode === 1) { // Mode 1: One controller mode
+            if (gamePadCount >= 1) { // Make sure controller(s) are connected
                 translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
                 traThrottle = traControl.axes[6]*-0.5+1
-                updateWorm("pitch");
-                updateWorm("yaw");
-                updateWorm("roll");
-                traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40
-                if (Math.round(traControl.axes[9] * 10) === -10 || Math.round(traControl.axes[9] * 10) === -7 || Math.round(traControl.axes[9] * 10) === 10){
-                    if (debug) {
-                        console.log("Up")
-                    }
-                    YControl = 1
-                } else if (Math.round(traControl.axes[9] * 10) === -1 || Math.round(traControl.axes[9] * 10) === 1 || Math.round(traControl.axes[9] * 10) === 4){
-                    YControl = -1
-                    if (debug) {
-                        console.log("Down")
-                    }
-                } else {
-                    YControl = 0
-                    if (debug) {
-                        console.log("Stop")
-                    }
-                }
-                traY = (traY * 39 + YControl * traThrottle/40) / 40
-                traZ = (traZ * 39 + traControl.axes[1]/20 * traThrottle) / 40
-                motionVector = new THREE.Vector3(traX, traY, traZ);
+                updateWorm("pitch"); // Visual stuff: the pitch direction indicator - Useless for no rotation
+                updateWorm("yaw"); // Visual stuff: the yaw direction indicator - Useless for no rotation
+                updateWorm("roll"); // Visual stuff: the roll direction indicator - Useless for no rotation
+                traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40 // Left / Right smoothening ratio: 1 to 40
+                traY = (traY * 39 + traControl.axes[1]/20 * traThrottle) / 40 // Up / Down smoothening ratio: 1 to 40
+                motionVector = new THREE.Vector3(traX, traY, motionVector.z); // Update the motion's X and Y, Z is controlled by function handleGamepadInput(), and thus unchanged
             }    
+        // MODIFIED 0617 END
+            
         } else {
             if (gamePadCount >= 2) {
                 translationPulseSize = 0.0008 * (traControl.axes[6]*-0.5+1)
@@ -1879,11 +1866,37 @@ function handleGamepadInput() {
     const gamepads = navigator.getGamepads();
     
     if (gamepads && gamepads[0]) {
-        if (mode === 2) {
-            if (gamePadCount >= 1) {
+        
+        // MODIFIED 0617
+        if (mode === 1) { // Mode 1: One controller mode
+            if (gamePadCount >= 1) { // Make sure controller(s) are connected
                 traControl = navigator.getGamepads()[gamePads[0]]
+                if (Math.round(traControl.axes[9] * 10) === -10 ||  // All combinations for forward-ish thumb button
+                    Math.round(traControl.axes[9] * 10) === -7 || 
+                    Math.round(traControl.axes[9] * 10) === 10) 
+                {
+                    if (debug) {
+                        console.log("Forward");
+                    }
+                    translateForward();
+                } 
+                else if (Math.round(traControl.axes[9] * 10) === -1 || 
+                         Math.round(traControl.axes[9] * 10) === 1 || 
+                         Math.round(traControl.axes[9] * 10) === 4) // All combinations for backward-ish thumb button
+                {
+                    if (debug) {
+                        console.log("Backward");
+                    }
+                    translateBackwward();
+                } 
+            } 
+            else // Controllers not connected
+            {
+                console.log("Error: Controllers not found")
             }
-        } else if (gamePadCount === 2) {
+        // MODIFIED 0617 END
+            
+        } else if (gamePadCount === 2) { 
             rotControl = navigator.getGamepads()[gamePads[0]];
             traControl = navigator.getGamepads()[gamePads[1]];
             if (rotControl.buttons[0].pressed) {
@@ -1893,7 +1906,7 @@ function handleGamepadInput() {
             }
         }
     
-}
+    } 
 }
 
 function switchController() {

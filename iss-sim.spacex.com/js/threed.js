@@ -1438,7 +1438,7 @@ function render() {
                 updateWorm("yaw"); // Visual stuff: the yaw direction indicator - Useless for no rotation
                 updateWorm("roll"); // Visual stuff: the roll direction indicator - Useless for no rotation
                 traX = (traX * 39 + traControl.axes[0]/20 * traThrottle) / 40 // Left / Right smoothening ratio: 1 to 40
-                traY = (traY * 39 + traControl.axes[1]/20 * traThrottle) / 40 // Up / Down smoothening ratio: 1 to 40
+                traY = (traY * 39 - traControl.axes[1]/20 * traThrottle) / 40 // Up / Down smoothening ratio: 1 to 40
                 motionVector = new THREE.Vector3(traX, traY, motionVector.z); // Update the motion's X and Y, Z is controlled by function handleGamepadInput(), and thus unchanged
             }    
         // MODIFIED 0617 END
@@ -1887,7 +1887,7 @@ function handleGamepadInput() {
                     if (debug) {
                         console.log("Backward");
                     }
-                    translateBackwward();
+                    translateBackward();
                 } 
             } 
             else // Controllers not connected
